@@ -7,14 +7,15 @@ Deno 智能虚拟货币交易机器人原型。按照 [`docs/trading_bot_plan.md
 1. 安装 [Deno](https://deno.land/)。
 2. 选择交易所：
 
-   默认使用内建的模拟交易所。若要连接 Kraken 现货交易，请提前设置环境变量：
+   默认使用内建的模拟交易所。若要连接 OKX 现货交易，请提前设置环境变量：
 
    ```bash
-   export EXCHANGE_PROVIDER=kraken
-   export KRAKEN_API_KEY="你的Kraken API Key"
-   export KRAKEN_API_SECRET="你的Kraken API Secret"
-   # 如需自定义API地址（例如沙盒环境）
-   # export KRAKEN_BASE_URL="https://api.kraken.com"
+   export EXCHANGE_PROVIDER=okx
+   export OKX_API_KEY="你的OKX API Key"
+   export OKX_API_SECRET="你的OKX API Secret"
+   export OKX_PASSPHRASE="你的OKX API Passphrase"
+   # 如需自定义API地址（例如模拟盘环境）
+   # export OKX_BASE_URL="https://www.okx.com"
    ```
 
    > ⚠️ 实盘交易前请确认 API 权限、资金安全策略，并确保仅使用现货无杠杆权限。

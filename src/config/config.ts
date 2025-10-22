@@ -1,7 +1,7 @@
 import { StrategyType } from "../types.ts";
 import { safeGetEnv } from "../utils/env.ts";
 
-export type ExchangeProvider = "mock" | "kraken";
+export type ExchangeProvider = "mock" | "okx";
 
 export interface MockExchangeConfig {
   initialPrice: number;
@@ -9,16 +9,17 @@ export interface MockExchangeConfig {
   priceDrift: number;
 }
 
-export interface KrakenExchangeConfig {
+export interface OkxExchangeConfig {
   apiKey?: string;
   apiSecret?: string;
+  passphrase?: string;
   baseUrl: string;
 }
 
 export interface ExchangeConfig {
   provider: ExchangeProvider;
   mock?: MockExchangeConfig;
-  kraken?: KrakenExchangeConfig;
+  okx?: OkxExchangeConfig;
 }
 
 export interface StrategyConfig {
@@ -44,8 +45,8 @@ export interface AppConfig {
 
 const providerFromEnv = (): ExchangeProvider => {
   const value = safeGetEnv("EXCHANGE_PROVIDER")?.toLowerCase();
-  if (value === "kraken") {
-    return "kraken";
+  if (value === "okx") {
+    return "okx";
   }
   return "mock";
 };
@@ -56,10 +57,11 @@ const defaultMockConfig: MockExchangeConfig = {
   priceDrift: 0.0004,
 };
 
-const defaultKrakenConfig: KrakenExchangeConfig = {
-  apiKey: safeGetEnv("KRAKEN_API_KEY"),
-  apiSecret: safeGetEnv("KRAKEN_API_SECRET"),
-  baseUrl: safeGetEnv("KRAKEN_BASE_URL") ?? "https://api.kraken.com",
+const defaultOkxConfig: OkxExchangeConfig = {
+  apiKey: safeGetEnv("OKX_API_KEY"),
+  apiSecret: safeGetEnv("OKX_API_SECRET"),
+  passphrase: safeGetEnv("OKX_PASSPHRASE"),
+  baseUrl: safeGetEnv("OKX_BASE_URL") ?? "https://www.okx.com",
 };
 
 export const defaultConfig: AppConfig = {
@@ -73,7 +75,7 @@ export const defaultConfig: AppConfig = {
   exchange: {
     provider: providerFromEnv(),
     mock: defaultMockConfig,
-    kraken: defaultKrakenConfig,
+    okx: defaultOkxConfig,
   },
   strategies: [
     {

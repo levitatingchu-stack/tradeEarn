@@ -1,14 +1,15 @@
 import { AppConfig } from "../config/config.ts";
 import { ExchangeClient } from "./exchange.ts";
 import { MockExchange } from "./mock_exchange.ts";
-import { KrakenExchange } from "./kraken_exchange.ts";
+import { OkxExchange } from "./okx_exchange.ts";
 
 export function createExchange(config: AppConfig): ExchangeClient {
-  if (config.exchange.provider === "kraken") {
-    return new KrakenExchange({
-      apiKey: config.exchange.kraken?.apiKey,
-      apiSecret: config.exchange.kraken?.apiSecret,
-      baseUrl: config.exchange.kraken?.baseUrl,
+  if (config.exchange.provider === "okx") {
+    return new OkxExchange({
+      apiKey: config.exchange.okx?.apiKey,
+      apiSecret: config.exchange.okx?.apiSecret,
+      passphrase: config.exchange.okx?.passphrase,
+      baseUrl: config.exchange.okx?.baseUrl,
     });
   }
   const mock = config.exchange.mock;
