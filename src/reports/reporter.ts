@@ -40,7 +40,8 @@ export class Reporter {
   }
 
   renderMarkdown(performance: DailyPerformance[]): string {
-    const header = "| 策略 | 日期 | 收益 (¥) | 收益率 | 最大回撤 | 交易次数 |\n| --- | --- | ---: | ---: | ---: | ---: |";
+    const header =
+      "| 策略 | 日期 | 收益 (¥) | 收益率 | 最大回撤 | 交易次数 |\n| --- | --- | ---: | ---: | ---: | ---: |";
     const rows = performance.map((item) => {
       const pnl = item.pnl.toFixed(2);
       const ret = (item.returnPct * 100).toFixed(2) + "%";

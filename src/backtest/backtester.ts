@@ -83,11 +83,11 @@ export class Backtester {
     };
     const decision = bundle.engine.decide(context);
     const enforced = this.riskManager.enforce(bundle.config, context, decision);
-    await this.#executeDecision(bundle, enforced, tick.price, decision);
+    this.#executeDecision(bundle, enforced, tick.price, decision);
     this.#captureSnapshot(bundle, tick.price, tick.timestamp);
   }
 
-  async #executeDecision(
+  #executeDecision(
     bundle: StrategyBundle,
     decision: EnforcedDecision,
     price: number,

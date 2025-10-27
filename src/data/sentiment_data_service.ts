@@ -8,6 +8,7 @@ export class StaticSentimentProvider implements SentimentProvider {
   constructor(private readonly baseScore: number, private readonly noise = 0.15) {}
 
   async fetch(symbol: string): Promise<SentimentSnapshot[]> {
+    await Promise.resolve(); // Keep async for interface compatibility
     const now = new Date();
     const jitter = () => (Math.random() - 0.5) * this.noise;
     return [

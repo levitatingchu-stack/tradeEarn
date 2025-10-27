@@ -22,4 +22,6 @@ export interface ExchangeClient {
   placeOrder(order: OrderRequest): Promise<OrderResult>;
   currentPrice(symbol: string): number;
   getTradeHistory(): TradeRecord[];
+  validateCredentials?(): Promise<{ valid: boolean; error?: string }>;
+  hasCredentials?(): boolean;
 }

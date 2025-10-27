@@ -2,6 +2,7 @@ import { StrategyType } from "../types.ts";
 import { safeGetEnv } from "../utils/env.ts";
 
 export type ExchangeProvider = "mock" | "okx";
+export type TradingMode = "backtest" | "live";
 
 export interface MockExchangeConfig {
   initialPrice: number;
@@ -31,7 +32,20 @@ export interface StrategyConfig {
   targetDailyReturn: number;
 }
 
+export interface LiveTradingConfig {
+  intervalMinutes: number; // 交易决策间隔（分钟）
+  maxIterations?: number; // 最大迭代次数，不设置则无限运行
+  stopOnError: boolean; // 遇到错误是否停止
+  reconnectAttempts: number; // API 失败重试次数
+  reconnectDelaySeconds: number; // 重试延迟（秒）
+}
+
+export interface BacktestConfig {
+  iterations: number; // 回测迭代次数
+}
+
 export interface AppConfig {
+  mode: TradingMode; // 运行模式：回测或实时交易
   baseCurrency: string;
   quoteCurrency: string;
   tradingPair: string;
@@ -41,6 +55,8 @@ export interface AppConfig {
   reportDirectory: string;
   tradeLogPath: string;
   exchange: ExchangeConfig;
+  liveTrading: LiveTradingConfig;
+  backtest: BacktestConfig;
 }
 
 const providerFromEnv = (): ExchangeProvider => {
@@ -49,6 +65,14 @@ const providerFromEnv = (): ExchangeProvider => {
     return "okx";
   }
   return "mock";
+};
+
+const modeFromEnv = (): TradingMode => {
+  const value = safeGetEnv("TRADING_MODE")?.toLowerCase();
+  if (value === "live") {
+    return "live";
+  }
+  return "backtest";
 };
 
 const defaultMockConfig: MockExchangeConfig = {
@@ -65,6 +89,7 @@ const defaultOkxConfig: OkxExchangeConfig = {
 };
 
 export const defaultConfig: AppConfig = {
+  mode: modeFromEnv(),
   baseCurrency: "USDT",
   quoteCurrency: "USD",
   tradingPair: "BTC/USDT",
@@ -76,6 +101,18 @@ export const defaultConfig: AppConfig = {
     provider: providerFromEnv(),
     mock: defaultMockConfig,
     okx: defaultOkxConfig,
+  },
+  liveTrading: {
+    intervalMinutes: Number(safeGetEnv("LIVE_INTERVAL_MINUTES")) || 5,
+    maxIterations: safeGetEnv("LIVE_MAX_ITERATIONS")
+      ? Number(safeGetEnv("LIVE_MAX_ITERATIONS"))
+      : undefined,
+    stopOnError: safeGetEnv("LIVE_STOP_ON_ERROR") === "true",
+    reconnectAttempts: Number(safeGetEnv("LIVE_RECONNECT_ATTEMPTS")) || 3,
+    reconnectDelaySeconds: Number(safeGetEnv("LIVE_RECONNECT_DELAY")) || 5,
+  },
+  backtest: {
+    iterations: Number(safeGetEnv("BACKTEST_ITERATIONS")) || 120,
   },
   strategies: [
     {

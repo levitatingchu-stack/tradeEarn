@@ -1,4 +1,4 @@
-import { PortfolioState, TradeRecord, StrategyType } from "../types.ts";
+import { PortfolioState, StrategyType, TradeRecord } from "../types.ts";
 
 export class Portfolio {
   readonly state: PortfolioState;

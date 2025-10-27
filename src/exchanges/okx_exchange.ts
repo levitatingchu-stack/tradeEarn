@@ -33,6 +33,45 @@ export class OkxExchange implements ExchangeClient {
     this.#baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
   }
 
+  /**
+   * 验证 API 凭证是否有效
+   * 调用账户余额接口来测试凭证
+   */
+  async validateCredentials(): Promise<{ valid: boolean; error?: string }> {
+    if (!this.#apiKey || !this.#apiSecret || !this.#passphrase) {
+      return {
+        valid: false,
+        error: "Missing API credentials (apiKey, apiSecret, or passphrase)",
+      };
+    }
+
+    try {
+      // 调用账户余额接口测试凭证（这是一个需要认证的轻量级接口）
+      const response = await this.#privateRequest("GET", "/api/v5/account/balance", undefined);
+      if (response.code === "0") {
+        return { valid: true };
+      } else {
+        return {
+          valid: false,
+          error: `API Error: ${response.msg ?? response.code}`,
+        };
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      return {
+        valid: false,
+        error: `Validation failed: ${errorMsg}`,
+      };
+    }
+  }
+
+  /**
+   * 检查是否配置了 API 凭证
+   */
+  hasCredentials(): boolean {
+    return !!(this.#apiKey && this.#apiSecret && this.#passphrase);
+  }
+
   async getLatestTick(symbol: string): Promise<MarketTick> {
     const instId = toOkxInstrument(symbol);
     const response = await fetch(`${this.#baseUrl}/api/v5/market/ticker?instId=${instId}`);
@@ -110,7 +149,9 @@ export class OkxExchange implements ExchangeClient {
     return {
       id: orderData.ordId ?? orderData.clOrdId ?? crypto.randomUUID(),
       filledSize: Number.isFinite(filledSize) ? filledSize : order.size,
-      averagePrice: Number.isFinite(averagePrice) ? averagePrice : order.price ?? this.#lastTick?.price ?? 0,
+      averagePrice: Number.isFinite(averagePrice)
+        ? averagePrice
+        : order.price ?? this.#lastTick?.price ?? 0,
       feesPaid: Number.isFinite(feesPaid) ? feesPaid : 0,
       timestamp,
     };
@@ -120,7 +161,11 @@ export class OkxExchange implements ExchangeClient {
     return [];
   }
 
-  async #privateRequest(method: string, path: string, body?: Record<string, unknown>): Promise<any> {
+  async #privateRequest(
+    method: string,
+    path: string,
+    body?: Record<string, unknown>,
+  ): Promise<{ code: string; msg?: string; data?: unknown[] }> {
     const timestamp = new Date().toISOString();
     const bodyText = body ? JSON.stringify(body) : "";
     const signature = await this.#sign(timestamp, method, path, bodyText);

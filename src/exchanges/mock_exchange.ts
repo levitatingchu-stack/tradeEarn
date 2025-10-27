@@ -28,6 +28,7 @@ export class MockExchange implements ExchangeClient {
   }
 
   async getLatestTick(symbol: string): Promise<MarketTick> {
+    await Promise.resolve(); // Keep async for interface compatibility
     if (symbol !== this.#symbol) {
       throw new Error(`Unsupported symbol ${symbol}`);
     }
@@ -83,6 +84,17 @@ export class MockExchange implements ExchangeClient {
     return this.#history;
   }
 
+  async validateCredentials(): Promise<{ valid: boolean; error?: string }> {
+    // Mock exchange doesn't need credentials
+    await Promise.resolve(); // Keep async for interface compatibility
+    return { valid: true };
+  }
+
+  hasCredentials(): boolean {
+    // Mock exchange doesn't need credentials
+    return true;
+  }
+
   #simulatePriceMove() {
     const randomShock = (Math.random() - 0.5) * this.#volatility;
     this.#price = Math.max(1, this.#price * (1 + randomShock + this.#priceDrift));
@@ -91,7 +103,8 @@ export class MockExchange implements ExchangeClient {
   async #appendToLog(record: TradeRecord) {
     if (!this.#logPath) return;
     await ensureDir(dirname(this.#logPath));
-    const header = "strategy,timestamp,action,price,size,fees,reason,confidence,stopLoss,takeProfit";
+    const header =
+      "strategy,timestamp,action,price,size,fees,reason,confidence,stopLoss,takeProfit";
     const line = [
       record.strategy,
       record.timestamp.toISOString(),
